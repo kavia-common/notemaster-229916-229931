@@ -133,6 +133,16 @@ EOF
 echo "psql postgresql://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}" > db_connection.txt
 echo "Connection string saved to db_connection.txt"
 
+# Initialize application schema (idempotent).
+# NOTE: This relies strictly on db_connection.txt per container contract.
+if [ -f "./init_schema.sh" ]; then
+    echo "Initializing notes app schema..."
+    chmod +x ./init_schema.sh 2>/dev/null || true
+    ./init_schema.sh
+else
+    echo "WARNING: init_schema.sh not found; skipping notes app schema initialization."
+fi
+
 # Save environment variables to a file
 cat > db_visualizer/postgres.env << EOF
 export POSTGRES_URL="postgresql://localhost:${DB_PORT}/${DB_NAME}"
